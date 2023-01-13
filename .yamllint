@@ -1,0 +1,9 @@
+---
+rules:
+  document-start:
+    present: true
+  indentation:
+    level: error
+    indent-sequences: consistent
+ignore: |
+  .tox

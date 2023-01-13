@@ -1,0 +1,173 @@
+[build-system]
+requires = [
+  "setuptools >= 63.0.0", # required by pyproject+setuptools_scm integration
+  "setuptools_scm[toml] >= 7.0.5", # required for "no-local-version" scheme
+
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+# https://peps.python.org/pep-0621/#readme
+requires-python = ">=3.8"
+dynamic = ["version", "dependencies", "optional-dependencies"]
+name = "pia"
+description = "(Alternative) Package Installer for Ansible"
+readme = "README.md"
+authors = [{ "name" = "Sorin Sbarnea", "email" = "sorin.sbarnea@gmail.com" }]
+maintainers = [
+  { "name" = "Sorin Sbarnea", "email" = "sorin.sbarnea@gmail.com" }
+]
+license = { text = "MIT" }
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Information Technology",
+  "Intended Audience :: System Administrators",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: MacOS",
+  "Operating System :: POSIX",
+  "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python",
+  "Topic :: System :: Systems Administration",
+  "Topic :: Software Development :: Quality Assurance",
+  "Topic :: Software Development :: Testing",
+  "Topic :: Utilities",
+]
+keywords = ["ansible"]
+
+[project.urls]
+homepage = "https://github.com/pycontribs/pia"
+repository = "https://github.com/pycontribs/pia"
+changelog = "https://github.com/pycontribs/pia/releases"
+
+[project.scripts]
+pia = "pia.__main__:main"
+
+[tool.black]
+target-version = ["py39"]
+
+[tool.codespell]
+skip = ".tox,.mypy_cache,build,.git,.eggs,pip-wheel-metadata"
+
+[tool.coverage.run]
+source = ["src"]
+branch = true
+parallel = true
+concurrency = ["multiprocessing", "thread"]
+data_file = ".tox/.coverage"
+
+[tool.coverage.report]
+exclude_lines = ["pragma: no cover", "if TYPE_CHECKING:"]
+fail_under = 35
+skip_covered = true
+
+[tool.isort]
+profile = "black"
+known_third_party = "ansible,pytest,setuptools,yaml"
+# https://black.readthedocs.io/en/stable/the_black_code_style.html#line-length
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+ensure_newline_before_comments = true
+line_length = 88
+
+[tool.mypy]
+python_version = 3.9
+color_output = true
+error_summary = true
+disallow_untyped_calls = true
+disallow_untyped_defs = true
+disallow_any_generics = true
+# disallow_any_unimported = True
+# warn_redundant_casts = True
+# warn_return_any = True
+# warn_unused_configs = True
+# site-packages is here to help vscode mypy integration getting confused
+exclude = "(build|dist|test/local-content|site-packages|~/.pyenv)"
+
+[[tool.mypy.overrides]]
+module = ["ansible.*", "yamllint.*", "pia._version"]
+ignore_missing_imports = true
+ignore_errors = true
+
+[tool.pylint.MAIN]
+extension-pkg-allow-list = ["black.parsing"]
+
+[tool.pylint.IMPORTS]
+preferred-modules = ["py:pathlib", "unittest:pytest"]
+
+[tool.pylint.MASTER]
+# Ignore as being generated:
+ignore-paths = "^src/pia/_version.*$"
+
+[tool.pylint."MESSAGES CONTROL"]
+disable = [
+  # On purpose disabled as we rely on black
+  "line-too-long",
+]
+
+[tool.pylint.TYPECHECK]
+# pylint is unable to detect Namespace attributes and will throw a E1101
+generated-members = "options.*"
+
+[tool.pylint.SUMMARY]
+# We don't need the score spamming console, as we either pass or fail
+score = "n"
+
+# spell-checker:ignore filterwarnings norecursedirs optionflags
+[tool.pytest.ini_options]
+# do not add options here as this will likely break either console runs or IDE
+# integration like vscode or pycharm
+addopts = "-p no:pytest_cov"
+# https://code.visualstudio.com/docs/python/testing
+# coverage is re-enabled in `tox.ini`. That approach is safer than
+# `--no-cov` which prevents activation from tox.ini and which also fails
+# when plugin is effectively missing.
+doctest_optionflags = ["ALLOW_UNICODE", "ELLIPSIS"]
+filterwarnings = [
+  "error",
+  # Ansible originated
+  "ignore:The _yaml extension module is now located at yaml._yaml and its location is subject to change:DeprecationWarning:",
+  # Ansible insides on py310:
+  "ignore:_SixMetaPathImporter:ImportWarning",
+  "ignore:_AnsibleCollectionFinder:ImportWarning",
+  "ignore:_AnsibleCollectionRootPkgLoader:ImportWarning",
+  "ignore:_AnsibleCollectionNSPkgLoader.exec_module:ImportWarning",
+  "ignore:_AnsibleCollectionPkgLoader.exec_module:ImportWarning",
+  "ignore:_AnsiblePathHookFinder.find_spec:ImportWarning",
+  "ignore:The distutils package is deprecated and slated for removal:DeprecationWarning",
+]
+minversion = "4.6.6"
+norecursedirs = [
+  "build",
+  "collections",
+  "dist",
+  "docs",
+  ".cache",
+  ".eggs",
+  ".git",
+  ".github",
+  ".tox",
+  "*.egg",
+]
+# Using --pyargs instead of testpath as we embed some tests
+# See: https://github.com/pytest-dev/pytest/issues/6451#issuecomment-687043537
+# testpaths =
+xfail_strict = true
+
+[tool.setuptools.dynamic]
+optional-dependencies.test = { file = [".config/requirements-test.txt"] }
+optional-dependencies.lock = { file = [".config/requirements-lock.txt"] }
+dependencies = { file = [".config/requirements.in"] }
+
+[tool.setuptools_scm]
+local_scheme = "no-local-version"
+write_to = "src/pia/_version.py"
