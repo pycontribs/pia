@@ -50,7 +50,6 @@ def main(args: list[str] | None = None) -> None:
 
     options = parser.parse_args(args)
     if options.command == "list":
-
         colmap = get_local_collections()
         if options.format == "plain":
             for collection, data in colmap.items():
