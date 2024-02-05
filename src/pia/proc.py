@@ -1,4 +1,5 @@
 """Module to work with processes."""
+
 from __future__ import annotations
 
 import json

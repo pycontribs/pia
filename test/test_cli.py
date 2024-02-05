@@ -1,4 +1,5 @@
 """Tests for PIA."""
+
 import pytest
 
 from pia.__main__ import main

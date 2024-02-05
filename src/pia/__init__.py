@@ -1,4 +1,5 @@
 """PIA - Package Installer for Ansible."""
+
 try:
     from pia._version import version as __version__
 except ImportError:  # pragma: no branch
